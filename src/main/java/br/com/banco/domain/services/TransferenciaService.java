@@ -1,11 +1,15 @@
 package br.com.banco.domain.services;
 
 import java.time.LocalDate;
-import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import br.com.banco.constants.AppConstants;
 import br.com.banco.domain.entities.Transferencia;
+import br.com.banco.domain.responses.TransferenciaResponse;
 import br.com.banco.infra.repositories.TransferenciaRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -15,20 +19,37 @@ public class TransferenciaService {
 
     private final TransferenciaRepository repository;
 
-    public List<Transferencia> obterTransferencias(LocalDate dataInicial, LocalDate dataFinal, String nomeOperador) {
+    public TransferenciaResponse obterTransferencias(LocalDate dataInicial, LocalDate dataFinal, String nomeOperador,
+            int pageNumber, int pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<Transferencia> transferencias;
 
         if (dataInicial != null && dataFinal != null && nomeOperador == null) {
-            return repository.buscarPorIntervaloDeData(dataInicial, dataFinal.plusDays(1));
+            transferencias = repository.buscarPorIntervaloDeData(pageable, dataInicial, dataFinal.plusDays(1));
 
         } else if (dataInicial != null && dataFinal != null && nomeOperador != null) {
-            return repository.buscarPorIntervaloDeDataENomeOperador(dataInicial, dataFinal.plusDays(1), nomeOperador);
+            transferencias = repository.buscarPorIntervaloDeDataENomeOperador(pageable, dataInicial,
+                    dataFinal.plusDays(1),
+                    nomeOperador);
 
         } else if (dataInicial == null && dataFinal == null && nomeOperador != null) {
-            return repository.findAllByNomeOperadorTransacaoIgnoreCase(nomeOperador);
+            transferencias = repository.findAllByNomeOperadorTransacaoIgnoreCase(pageable, nomeOperador);
 
         } else {
-            return repository.findAll();
+            transferencias = repository.findAll(pageable);
+
         }
+        TransferenciaResponse transferenciaResponse = new TransferenciaResponse();
+        transferenciaResponse.setTransferencias(transferencias.getContent());
+        transferenciaResponse.setPageNumber(transferencias.getNumber());
+        transferenciaResponse.setPageSize(transferencias.getSize());
+        transferenciaResponse.setTotalElements(transferencias.getNumberOfElements());
+        transferenciaResponse.setTotalPages(transferencias.getTotalPages());
+        transferenciaResponse.setLast(transferencias.isLast());
+
+        return transferenciaResponse;
     }
 
 }
