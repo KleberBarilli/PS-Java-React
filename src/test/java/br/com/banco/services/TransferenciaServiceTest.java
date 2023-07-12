@@ -3,6 +3,7 @@ package br.com.banco.services;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -45,21 +46,21 @@ public class TransferenciaServiceTest {
         transferencia3 = new Transferencia();
 
         transferencia1.setId((long) 1);
-        transferencia1.setDataTransferencia(LocalDateTime.now());
+        transferencia1.setDataTransferencia(LocalDate.now());
         transferencia1.setNomeOperadorTransacao("Kleber");
         transferencia1.setTipo("DEPOSITO");
         transferencia1.setValor(new BigDecimal("500.78"));
         transferencia1.setConta(conta);
 
         transferencia2.setId((long) 2);
-        transferencia2.setDataTransferencia(LocalDateTime.now());
+        transferencia2.setDataTransferencia(LocalDate.now());
         transferencia2.setNomeOperadorTransacao("Kleber");
         transferencia2.setTipo("SAQUE");
         transferencia2.setValor(new BigDecimal("300"));
         transferencia2.setConta(conta);
 
         transferencia3.setId((long) 3);
-        transferencia3.setDataTransferencia(LocalDateTime.now());
+        transferencia3.setDataTransferencia(LocalDate.now());
         transferencia3.setNomeOperadorTransacao("Júlia");
         transferencia3.setTipo("SAQUE");
         transferencia3.setValor(new BigDecimal("100"));
@@ -71,11 +72,35 @@ public class TransferenciaServiceTest {
 
         List<Transferencia> transferencias = Arrays.asList(transferencia1, transferencia2, transferencia3);
         when(transferenciaRepository.findAll()).thenReturn(transferencias);
-        List<Transferencia> result = transferenciaService.findAll();
+        List<Transferencia> result = transferenciaService.obterTransferencias(null, null, null);
 
         Assertions.assertEquals(3, result.size());
         Assertions.assertEquals(transferencia1, result.get(0));
         Assertions.assertEquals(transferencia2, result.get(1));
         Assertions.assertEquals(transferencia3, result.get(2));
     }
+
+    @Test
+    public void deveRetornarTransferenciasPorPeriodoDeData() {
+        LocalDate dataInicial = LocalDate.of(2022, 1, 1);
+        LocalDate dataFinal = LocalDate.of(2023, 1, 1);
+
+        transferencia1.setDataTransferencia(LocalDate.of(2022, 10, 15));
+        transferencia2.setDataTransferencia(LocalDate.of(2023, 2, 4));
+        transferencia3.setDataTransferencia(LocalDate.of(2022, 12, 31));
+
+        List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia1, transferencia3);
+
+        when(transferenciaRepository.buscarPorIntervaloDeData(dataInicial, dataFinal.plusDays(1)))
+                .thenReturn(transferenciasEsperadas);
+
+        List<Transferencia> result = transferenciaService.obterTransferencias(dataInicial, dataFinal, null);
+
+        System.out.println(result);
+
+        Assertions.assertEquals(2, result.size());
+        Assertions.assertEquals(transferencia1, result.get(0));
+        Assertions.assertEquals(transferencia3, result.get(1));
+    }
+
 }
