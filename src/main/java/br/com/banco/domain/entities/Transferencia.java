@@ -1,7 +1,7 @@
 package br.com.banco.domain.entities;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +28,7 @@ public class Transferencia {
     private Long id;
 
     @Column(name = "data_transferencia")
-    private LocalDateTime dataTransferencia;
+    private LocalDate dataTransferencia;
 
     private BigDecimal valor;
 
