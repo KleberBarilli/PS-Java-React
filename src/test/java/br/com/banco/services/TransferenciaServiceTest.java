@@ -12,9 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import br.com.banco.domain.entities.Conta;
 import br.com.banco.domain.entities.Transferencia;
+import br.com.banco.domain.responses.TransferenciaResponse;
 import br.com.banco.domain.services.TransferenciaService;
 import br.com.banco.infra.repositories.TransferenciaRepository;
 
@@ -68,18 +72,19 @@ public class TransferenciaServiceTest {
 
     @Test
     public void deveRetornarTodasAsTransferencias() {
-
         List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia1, transferencia2, transferencia3);
 
-        when(transferenciaRepository.findAll()).thenReturn(transferenciasEsperadas);
+        PageRequest pageable = PageRequest.of(1, 4);
+        Page<Transferencia> page = new PageImpl<>(transferenciasEsperadas, pageable, transferenciasEsperadas.size());
 
-        List<Transferencia> transferencias = transferenciaService.obterTransferencias(null, null, null);
+        when(transferenciaRepository.findAll(pageable)).thenReturn(page);
 
-        Assertions.assertEquals(3, transferencias.size());
-        Assertions.assertEquals(transferencia1, transferencias.get(0));
-        Assertions.assertEquals(transferencia2, transferencias.get(1));
-        Assertions.assertEquals(transferencia3, transferencias.get(2));
+        TransferenciaResponse transferenciaResponse = transferenciaService.obterTransferencias(null, null, null, 1, 4);
 
+        Assertions.assertEquals(3, transferenciaResponse.getTransferencias().size());
+        Assertions.assertEquals(transferencia1, transferenciaResponse.getTransferencias().get(0));
+        Assertions.assertEquals(transferencia2, transferenciaResponse.getTransferencias().get(1));
+        Assertions.assertEquals(transferencia3, transferenciaResponse.getTransferencias().get(2));
     }
 
     @Test
@@ -93,54 +98,59 @@ public class TransferenciaServiceTest {
 
         List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia1, transferencia3);
 
-        when(transferenciaRepository.buscarPorIntervaloDeData(dataInicial, dataFinal.plusDays(1)))
-                .thenReturn(transferenciasEsperadas);
+        PageRequest pageable = PageRequest.of(1, 4);
+        Page<Transferencia> page = new PageImpl<>(transferenciasEsperadas, pageable, transferenciasEsperadas.size());
 
-        List<Transferencia> transferencias = transferenciaService.obterTransferencias(dataInicial, dataFinal, null);
+        when(transferenciaRepository.buscarPorIntervaloDeData(pageable, dataInicial, dataFinal.plusDays(1)))
+                .thenReturn(page);
 
-        System.out.println(transferencias);
+        TransferenciaResponse transferenciaResponse = transferenciaService.obterTransferencias(dataInicial, dataFinal,
+                null, 1, 4);
 
-        Assertions.assertEquals(2, transferencias.size());
-        Assertions.assertEquals(transferencia1, transferencias.get(0));
-        Assertions.assertEquals(transferencia3, transferencias.get(1));
+        Assertions.assertEquals(2, transferenciaResponse.getTransferencias().size());
+        Assertions.assertEquals(transferencia1, transferenciaResponse.getTransferencias().get(0));
+        Assertions.assertEquals(transferencia3, transferenciaResponse.getTransferencias().get(1));
     }
 
     @Test
     public void deveRetornarTransferenciasPorPeriodoDeDataENomeOperador() {
-
         LocalDate dataInicial = LocalDate.of(2020, 1, 1);
         LocalDate dataFinal = LocalDate.of(2023, 1, 1);
         String nomeOperador = "Júlia";
 
         List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia3);
 
-        when(transferenciaRepository.buscarPorIntervaloDeDataENomeOperador(dataInicial, dataFinal.plusDays(1),
+        PageRequest pageable = PageRequest.of(1, 4);
+        Page<Transferencia> page = new PageImpl<>(transferenciasEsperadas, pageable, transferenciasEsperadas.size());
+
+        when(transferenciaRepository.buscarPorIntervaloDeDataENomeOperador(pageable, dataInicial, dataFinal.plusDays(1),
                 nomeOperador))
+                .thenReturn(page);
 
-                .thenReturn(transferenciasEsperadas);
-        List<Transferencia> transferencias = transferenciaService.obterTransferencias(dataInicial, dataFinal,
-                nomeOperador);
+        TransferenciaResponse transferenciaResponse = transferenciaService.obterTransferencias(dataInicial, dataFinal,
+                nomeOperador, 1, 4);
 
-        Assertions.assertEquals(1, transferencias.size());
-        Assertions.assertEquals(transferencia3, transferencias.get(0));
+        Assertions.assertEquals(1, transferenciaResponse.getTransferencias().size());
+        Assertions.assertEquals(transferencia3, transferenciaResponse.getTransferencias().get(0));
     }
 
     @Test
     public void deveRetornarTransferenciasPorNomeOperador() {
-
         String nomeOperador = "Júlia";
 
         List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia3);
 
-        when(transferenciaRepository.findAllByNomeOperadorTransacaoIgnoreCase(
-                nomeOperador))
-                .thenReturn(transferenciasEsperadas);
+        PageRequest pageable = PageRequest.of(1, 4);
+        Page<Transferencia> page = new PageImpl<>(transferenciasEsperadas, pageable, transferenciasEsperadas.size());
 
-        List<Transferencia> transferencias = transferenciaService.obterTransferencias(null, null,
-                nomeOperador);
+        when(transferenciaRepository.findAllByNomeOperadorTransacaoIgnoreCase(pageable, nomeOperador))
+                .thenReturn(page);
 
-        Assertions.assertEquals(1, transferencias.size());
-        Assertions.assertEquals(transferencia3, transferencias.get(0));
+        TransferenciaResponse transferenciaResponse = transferenciaService.obterTransferencias(null, null,
+                nomeOperador, 1, 4);
+
+        Assertions.assertEquals(1, transferenciaResponse.getTransferencias().size());
+        Assertions.assertEquals(transferencia3, transferenciaResponse.getTransferencias().get(0));
     }
 
 }
