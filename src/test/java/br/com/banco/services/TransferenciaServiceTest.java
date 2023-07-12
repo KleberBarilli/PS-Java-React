@@ -4,7 +4,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,14 +69,17 @@ public class TransferenciaServiceTest {
     @Test
     public void deveRetornarTodasAsTransferencias() {
 
-        List<Transferencia> transferencias = Arrays.asList(transferencia1, transferencia2, transferencia3);
-        when(transferenciaRepository.findAll()).thenReturn(transferencias);
-        List<Transferencia> result = transferenciaService.obterTransferencias(null, null, null);
+        List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia1, transferencia2, transferencia3);
 
-        Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals(transferencia1, result.get(0));
-        Assertions.assertEquals(transferencia2, result.get(1));
-        Assertions.assertEquals(transferencia3, result.get(2));
+        when(transferenciaRepository.findAll()).thenReturn(transferenciasEsperadas);
+
+        List<Transferencia> transferencias = transferenciaService.obterTransferencias(null, null, null);
+
+        Assertions.assertEquals(3, transferencias.size());
+        Assertions.assertEquals(transferencia1, transferencias.get(0));
+        Assertions.assertEquals(transferencia2, transferencias.get(1));
+        Assertions.assertEquals(transferencia3, transferencias.get(2));
+
     }
 
     @Test
@@ -94,13 +96,51 @@ public class TransferenciaServiceTest {
         when(transferenciaRepository.buscarPorIntervaloDeData(dataInicial, dataFinal.plusDays(1)))
                 .thenReturn(transferenciasEsperadas);
 
-        List<Transferencia> result = transferenciaService.obterTransferencias(dataInicial, dataFinal, null);
+        List<Transferencia> transferencias = transferenciaService.obterTransferencias(dataInicial, dataFinal, null);
 
-        System.out.println(result);
+        System.out.println(transferencias);
 
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals(transferencia1, result.get(0));
-        Assertions.assertEquals(transferencia3, result.get(1));
+        Assertions.assertEquals(2, transferencias.size());
+        Assertions.assertEquals(transferencia1, transferencias.get(0));
+        Assertions.assertEquals(transferencia3, transferencias.get(1));
+    }
+
+    @Test
+    public void deveRetornarTransferenciasPorPeriodoDeDataENomeOperador() {
+
+        LocalDate dataInicial = LocalDate.of(2020, 1, 1);
+        LocalDate dataFinal = LocalDate.of(2023, 1, 1);
+        String nomeOperador = "Júlia";
+
+        List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia3);
+
+        when(transferenciaRepository.buscarPorIntervaloDeDataENomeOperador(dataInicial, dataFinal.plusDays(1),
+                nomeOperador))
+
+                .thenReturn(transferenciasEsperadas);
+        List<Transferencia> transferencias = transferenciaService.obterTransferencias(dataInicial, dataFinal,
+                nomeOperador);
+
+        Assertions.assertEquals(1, transferencias.size());
+        Assertions.assertEquals(transferencia3, transferencias.get(0));
+    }
+
+    @Test
+    public void deveRetornarTransferenciasPorNomeOperador() {
+
+        String nomeOperador = "Júlia";
+
+        List<Transferencia> transferenciasEsperadas = Arrays.asList(transferencia3);
+
+        when(transferenciaRepository.findAllByNomeOperadorTransacaoIgnoreCase(
+                nomeOperador))
+                .thenReturn(transferenciasEsperadas);
+
+        List<Transferencia> transferencias = transferenciaService.obterTransferencias(null, null,
+                nomeOperador);
+
+        Assertions.assertEquals(1, transferencias.size());
+        Assertions.assertEquals(transferencia3, transferencias.get(0));
     }
 
 }
