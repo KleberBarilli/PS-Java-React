@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import br.com.banco.constants.AppConstants;
 import br.com.banco.domain.entities.Transferencia;
 import br.com.banco.domain.responses.TransferenciaResponse;
 import br.com.banco.infra.repositories.TransferenciaRepository;
