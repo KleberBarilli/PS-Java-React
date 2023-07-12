@@ -13,4 +13,7 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 
     @Query("SELECT t FROM Transferencia t WHERE t.dataTransferencia >= :dataInicial AND t.dataTransferencia < :dataFinal")
     List<Transferencia> buscarPorIntervaloDeData(LocalDate dataInicial, LocalDate dataFinal);
+
+    List<Transferencia> findAllByNomeOperadorTransacaoIgnoreCase(String nome);
+
 }
