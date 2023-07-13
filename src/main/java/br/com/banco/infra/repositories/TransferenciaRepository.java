@@ -21,4 +21,7 @@ public interface TransferenciaRepository extends JpaRepository<Transferencia, Lo
 
     Page<Transferencia> findAllByNomeOperadorTransacaoIgnoreCase(Pageable pageable, String nome);
 
+    @Query("SELECT SUM (t.valor) FROM Transferencia t")
+    Double valoresTotais();
+
 }

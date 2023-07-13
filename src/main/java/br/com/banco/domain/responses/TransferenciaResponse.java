@@ -18,4 +18,6 @@ public class TransferenciaResponse {
     private long totalElements;
     private int totalPages;
     private boolean last;
+    private double saldoTotal;
+    private double saldoNoPeriodo;
 }

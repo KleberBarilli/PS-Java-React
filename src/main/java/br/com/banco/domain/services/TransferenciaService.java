@@ -1,5 +1,6 @@
 package br.com.banco.domain.services;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import org.springframework.data.domain.Pageable;
@@ -47,6 +48,16 @@ public class TransferenciaService {
         transferenciaResponse.setTotalElements(transferencias.getNumberOfElements());
         transferenciaResponse.setTotalPages(transferencias.getTotalPages());
         transferenciaResponse.setLast(transferencias.isLast());
+
+        transferenciaResponse.setSaldoTotal(repository.valoresTotais());
+
+        BigDecimal saldoNoPeriodo = BigDecimal.ZERO;
+        for (Transferencia transferencia : transferencias.getContent()) {
+            saldoNoPeriodo = saldoNoPeriodo.add(transferencia.getValor());
+        }
+        double saldoNoPeriodoDouble = saldoNoPeriodo.doubleValue();
+
+        transferenciaResponse.setSaldoNoPeriodo(saldoNoPeriodoDouble);
 
         return transferenciaResponse;
     }
