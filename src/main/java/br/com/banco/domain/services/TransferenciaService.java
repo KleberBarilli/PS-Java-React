@@ -49,7 +49,14 @@ public class TransferenciaService {
         transferenciaResponse.setTotalPages(transferencias.getTotalPages());
         transferenciaResponse.setLast(transferencias.isLast());
 
-        transferenciaResponse.setSaldoTotal(repository.valoresTotais());
+        BigDecimal saldoTotal = BigDecimal.ZERO;
+
+        for (Transferencia transferencia : transferencias.getContent()) {
+            saldoTotal = saldoTotal.add(transferencia.getValor());
+        }
+
+        double saldoTotalDouble = saldoTotal.doubleValue();
+        transferenciaResponse.setSaldoTotal(saldoTotalDouble);
 
         BigDecimal saldoNoPeriodo = BigDecimal.ZERO;
         for (Transferencia transferencia : transferencias.getContent()) {
